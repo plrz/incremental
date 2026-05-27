@@ -15,7 +15,9 @@ import {
   enemyHpForWave, enemyGoldForWave, enemyDamageForWave,
   bossHpForWave, enemiesPerWave, isBossGateWave,
   MODIFIER_CHANCE,
+  dungeonEnemyHp, dungeonEnemyDamage,
 } from './scaling';
+import { updateQuestProgress } from './quests';
 import { calculateClickDamage, calculateDPS, calculateMaxHp, getPlayerElement, getElementalMultiplier } from './items';
 
 // ============================================================
@@ -153,8 +155,7 @@ export function processCombatTick(state: GameState): CombatTickResult {
   if (combat.currentEnemyHp > 0) {
     let damage = 0;
     if (activeDungeon) {
-      // Dungeon enemy damage: 5 * wave
-      damage = 5 * activeDungeon.wave;
+      damage = dungeonEnemyDamage(stats.highestWave, activeDungeon.dungeonId, activeDungeon.wave);
     } else if (worldBoss) {
       // World boss damage: 20 * currentWave
       damage = 20 * combat.currentWave;
@@ -219,8 +220,9 @@ export function processCombatTick(state: GameState): CombatTickResult {
 
       // Spawn next dungeon enemy
       if (activeDungeon.wave <= 10) {
-        combat.currentEnemyMaxHp = 50 * activeDungeon.wave;
-        combat.currentEnemyHp = 50 * activeDungeon.wave;
+        const nextHp = dungeonEnemyHp(stats.highestWave, activeDungeon.dungeonId, activeDungeon.wave);
+        combat.currentEnemyMaxHp = nextHp;
+        combat.currentEnemyHp = nextHp;
       }
 
       return {
@@ -250,6 +252,14 @@ export function processCombatTick(state: GameState): CombatTickResult {
         type: 'boss_defeated',
         data: { gems: gemReward, dust: dustReward, wave: combat.currentWave },
       });
+
+      // Award Dungeon Key (100% on wave % 50 === 0, otherwise 20%)
+      const isBossGateVictory = combat.currentWave % 50 === 0;
+      const getsKey = isBossGateVictory || Math.random() < 0.2;
+      if (getsKey) {
+        resources.dungeonKeys = (resources.dungeonKeys || 0) + 1;
+        events.push({ type: 'dungeon_key_drop', data: {} });
+      }
 
       // Guaranteed chest drop
       let chestIndex = 0;
@@ -519,7 +529,7 @@ export function processClick(state: GameState): {
     activeWorldBoss.hp = Math.max(0, activeWorldBoss.hp - dmg);
   }
 
-  const newState = {
+  const newState: GameState = {
     ...state,
     combat: {
       ...state.combat,
@@ -532,6 +542,18 @@ export function processClick(state: GameState): {
     },
     activeDungeon,
     worldBoss: activeWorldBoss,
+  };
+
+  // Update quest progress for clicks
+  const updatedQuests = updateQuestProgress(newState.quests.active, {
+    kills: 0,
+    gold: 0,
+    clicks: 1,
+    wave: newState.combat.currentWave,
+  });
+  newState.quests = {
+    ...newState.quests,
+    active: updatedQuests,
   };
 
   return { state: newState, damage: dmg, isCrit };

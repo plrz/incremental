@@ -7,6 +7,7 @@
 import type { GameState, ActiveDungeon, WorldBossState } from './gameState';
 import { DUNGEONS, WORLD_BOSSES } from '@/lib/gameConfig';
 import { createPetEgg } from './pets';
+import { dungeonEnemyHp, worldBossHp } from './scaling';
 
 // ============================================================
 // DUNGEONS
@@ -39,8 +40,8 @@ export function startDungeon(state: GameState, dungeonId: string): GameState {
     // Reset temporary HP/combat stats for the dungeon
     combat: {
       ...state.combat,
-      currentEnemyHp: 50 * activeDungeon.wave,
-      currentEnemyMaxHp: 50 * activeDungeon.wave,
+      currentEnemyHp: dungeonEnemyHp(state.stats.highestWave, dungeonId, activeDungeon.wave),
+      currentEnemyMaxHp: dungeonEnemyHp(state.stats.highestWave, dungeonId, activeDungeon.wave),
       enemiesDefeated: 0,
     },
   };
@@ -163,7 +164,7 @@ export function summonWorldBoss(state: GameState, bossId: string): GameState {
   const boss = WORLD_BOSSES.find(b => b.id === bossId);
   if (!boss) return state;
 
-  const hp = state.combat.currentWave * boss.hpMultiplier * 100;
+  const hp = worldBossHp(state.combat.currentWave, boss.hpMultiplier);
 
   const worldBoss: WorldBossState = {
     active: true,

@@ -258,6 +258,7 @@ export interface UpgradeState {
   xpMultiplier: number;
   bossKeyChance: number;
   gemDropChance: number;
+  runeCap: number;
 }
 
 // ============================================================
@@ -446,6 +447,7 @@ export const INITIAL_STATE: GameState = {
     xpMultiplier: 0,
     bossKeyChance: 0,
     gemDropChance: 0,
+    runeCap: 0,
   },
 
   skillTree: {

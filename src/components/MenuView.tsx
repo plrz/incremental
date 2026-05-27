@@ -20,7 +20,7 @@ export default function MenuView({
   state, selectTitle, updateSettings,
   handleExport, handleImport, handleWipe, handleManualSave,
 }: MenuViewProps) {
-  const [tab, setTab] = useState<'stats' | 'achievements' | 'titles' | 'settings'>('stats');
+  const [tab, setTab] = useState<'stats' | 'achievements' | 'titles' | 'settings' | 'help'>('stats');
   const [importStr, setImportStr] = useState('');
   const [exportStr, setExportStr] = useState('');
 
@@ -35,6 +35,7 @@ export default function MenuView({
         <button className={`tab ${tab === 'achievements' ? 'active' : ''}`} onClick={() => setTab('achievements')}><Twemoji emoji="🏆" /> Achievements</button>
         <button className={`tab ${tab === 'titles' ? 'active' : ''}`} onClick={() => setTab('titles')}><Twemoji emoji="🎖️" /> Titles</button>
         <button className={`tab ${tab === 'settings' ? 'active' : ''}`} onClick={() => setTab('settings')}><Twemoji emoji="⚙️" /> Settings</button>
+        <button className={`tab ${tab === 'help' ? 'active' : ''}`} onClick={() => setTab('help')}><Twemoji emoji="❓" /> Help Guide</button>
       </div>
 
       {tab === 'stats' && (
@@ -268,6 +269,115 @@ export default function MenuView({
             >
               <Twemoji emoji="🗑️" /> Wipe All Data
             </button>
+          </div>
+        </div>
+      )}
+
+      {tab === 'help' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="🛡️" /> Dungeon Trial Keys
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Dungeon Keys are used to enter the challenge Dungeons located in the **Endgame** tab. You can acquire Dungeon Keys in a few ways:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li><strong>Boss Drops:</strong> Defeating any Boss in the main Combat waves has a 20% chance to drop a Dungeon Key. Standard Boss Gate fights (every 50 waves) have a 100% guaranteed drop!</li>
+              <li><strong>Key Merchant:</strong> Visit the Key Merchant in the **Shop** tab. You can buy Dungeon Keys with Gold, Gems, or by trading in 5 Boss Keys.</li>
+            </ul>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="⏳" /> Time Crystals & Time Rifts
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Time Crystals are precious temporal gems. They are earned by completing Dungeon runs (clearing wave 10 in a Dungeon).
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginTop: '8px' }}>
+              Use Time Crystals in the **Endgame ➔ Time Rifts** tab to tear open spacetime rifts:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li><strong>Minor Rift:</strong> 2x tick speed boost for 30 minutes.</li>
+              <li><strong>Major Rift:</strong> 5x tick speed boost for 15 minutes.</li>
+              <li><strong>Temporal Storm:</strong> 10x tick speed boost for 10 minutes.</li>
+            </ul>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.4', marginTop: '8px' }}>
+              <em>Note: Speed rifts accelerate combat ticks, egg hatching, worker DPS ticks, and active skill cooldowns!</em>
+            </p>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="💀" /> Purity Orbs & Corruption
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Purity Orbs are gained from completing Dungeons (1-3 orbs depending on tier) or by summoning and defeating World Bosses (+5 orbs).
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginTop: '8px' }}>
+              Purity Orbs have two primary uses:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li><strong>Cleanse Corruption:</strong> Every 50 waves cleared, the game's corruption level increases. Higher corruption boosts enemy HP, damage, and gear drops but cuts gold rewards. Cleanse 25% corruption using 1 Purity Orb in the **Endgame ➔ Corruption** tab.</li>
+              <li><strong>Purity Altar Exchange:</strong> Trade Purity Orbs at the Altar (Corruption subtab) for Time Crystals, Rare Eggs, Dungeon Eggs, permanent Rune pouch capacity slots, Gems, or Stardust!</li>
+            </ul>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="🐉" /> Pets & Companions
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Pets are hatched from eggs that drop upon completing Dungeons. Hatching requires defeating monsters (kills) in active combat. Once hatched, equip them to gain massive multipliers to click damage, gold, XP, stardust, or worker DPS.
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginTop: '8px' }}>
+              To equip more pets simultaneously, purchase the <strong>Tamer</strong> rebirth upgrade in the **Shop** tab. This expands active slots up to a maximum of 5. Further slots are unlocked permanently by Ascending!
+            </p>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="⬆️" /> Tier Synthesis Crafting
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Synthesis is a powerful crafting option in the **Craft** tab:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li>Combine 3 unequipped gear items of the exact same slot and tier (e.g., 3 Tier 4 weapons).</li>
+              <li>Fusing them yields 1 item of the next tier (e.g., a Tier 5 weapon).</li>
+              <li><strong>Loot Cap Bypass:</strong> The tier dropped by standard chests is capped by your highest wave reached. Fusing items allows you to access higher tier stats early!</li>
+              <li><strong>Inherited Quality:</strong> The synthesized output item is guaranteed to inherit the highest quality of the three components. (For example, fusing 1 Epic and 2 Common items guarantees an Epic outcome!)</li>
+            </ul>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="👛" /> Runes & Forge Cap
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              Runes can be socketed into your gear to grant powerful element-aligned attributes.
+            </p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4', marginTop: '8px' }}>
+              Your base rune pouch capacity is capped at 50 runes. You can increase this cap permanently by:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li>Upgrading the **Rune Pouch** in the Upgrades shop (uses Gold, up to +100 slots).</li>
+              <li>Exchanging Purity Orbs at the **Purity Altar** in the Endgame corruption tab (+10 slots per exchange, unlimited).</li>
+            </ul>
+          </div>
+
+          <div className="glass-card" style={{ padding: 'var(--space-lg)' }}>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '8px', borderBottom: '1px solid var(--glass-border)', paddingBottom: '8px' }}>
+              <Twemoji emoji="♻️" /> Rebirth & Ascension Prestige
+            </h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: '1.4' }}>
+              When progress slows down, it is time to prestige:
+            </p>
+            <ul style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '8px 0 0 16px', lineHeight: '1.4' }}>
+              <li><strong>Rebirth:</strong> Spend gold to rebirth, resetting gold and items but awarding Rebirth Points (RP). Rebirth Points scale quadratically with your wave depth, and are multiplied by your total rebirth count. Spend RP on powerful permanent upgrades in the shop.</li>
+              <li><strong>Ascension:</strong> Reaching 50,000 Rebirth Points unlocks the option to Ascend. This resets Rebirth progression but awards Ascension Points (AP). AP is spent on meta perks like Factions, Offline efficiency boosts, and passive research multipliers!</li>
+            </ul>
           </div>
         </div>
       )}

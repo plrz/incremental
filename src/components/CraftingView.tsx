@@ -55,8 +55,12 @@ export default function CraftingView({ state, handleCombineItems, handleTransmut
 
       {/* Tier Synthesis */}
       <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 'var(--space-sm)' }}><Twemoji emoji="⬆️" /> Tier Synthesis</div>
-      <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
-        Combine 3 items of the same type and tier to create a higher tier item.
+      <div style={{ padding: '12px', background: 'rgba(59, 130, 246, 0.08)', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: 8, fontSize: 11, color: 'var(--text-secondary)', lineHeight: '1.4', marginBottom: 'var(--space-md)' }}>
+        💡 <strong>Progression Tip:</strong> Tier Synthesis lets you fuse 3 unequipped gear items of the exact same slot and tier into a single item of the next tier. 
+        <br />
+        • The output item <strong>inherits the highest quality</strong> among the three components (e.g. 1 Epic + 2 Commons = guaranteed Epic outcome!).
+        <br />
+        • This allows you to <strong>bypass standard chest wave caps</strong> to get higher tier gear stats early!
       </div>
 
       {combinable.length === 0 ? (

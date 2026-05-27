@@ -442,6 +442,7 @@ export const UPGRADES: Record<string, UpgradeDef> = {
   xpMultiplier: { id: "xpMultiplier", name: "Scholar", description: "Increases XP gained by 15% per level", baseCost: 500, costMultiplier: 1.6, maxLevel: 20, emoji: "📖" },
   bossKeyChance: { id: "bossKeyChance", name: "Keymaster", description: "Increases Boss Key drop chance by 20% per level", baseCost: 3000, costMultiplier: 2.5, maxLevel: 5, emoji: "🗝️" },
   gemDropChance: { id: "gemDropChance", name: "Gemologist", description: "Increases Gem drop chance by 10% per level", baseCost: 5000, costMultiplier: 2.3, maxLevel: 5, emoji: "💎" },
+  runeCap: { id: "runeCap", name: "Rune Pouch", description: "Increases rune storage by +10 slots per level", baseCost: 2000, costMultiplier: 2.2, maxLevel: 10, emoji: "👛" },
 };
 
 // ============================================================
@@ -469,6 +470,7 @@ export const REBIRTH_UPGRADES: Record<string, RebirthUpgradeDef> = {
   bossSlayer: { id: "bossSlayer", name: "Boss Slayer", description: "+10% Damage to Bosses", baseCost: 3, costMultiplier: 1.8, maxLevel: 20, effect: (level) => 1 + (level * 0.1) },
   xpBoost: { id: "xpBoost", name: "Knowledge", description: "+20% Experience Gain", baseCost: 2, costMultiplier: 1.6, maxLevel: 25, effect: (level) => 1 + (level * 0.2) },
   retainWave: { id: "retainWave", name: "Memory", description: "Start at 5% of your highest wave per level", baseCost: 10, costMultiplier: 2.5, maxLevel: 10, effect: (level) => level * 0.05 },
+  maxPets: { id: "maxPets", name: "Tamer", description: "+1 Max Active Pet Slot per level", baseCost: 10, costMultiplier: 3.5, maxLevel: 4, effect: (level) => level },
 };
 
 // ============================================================
@@ -759,23 +761,23 @@ export interface QuestTemplateDef {
 export const QUEST_TEMPLATES: QuestTemplateDef[] = [
   { type: "kill", targetBase: 10, rewardBase: { gold: 1000 }, name: "Hunt: {target} Enemies" },
   { type: "gold", targetBase: 5000, rewardBase: { dust: 50 }, name: "Gather: {target} Gold" },
-  { type: "click", targetBase: 100, rewardBase: { gems: 1 }, name: "Active: Click {target} Times" },
+  { type: "click", targetBase: 100, rewardBase: { gems: 10 }, name: "Active: Click {target} Times" },
   { type: "kill", targetBase: 500, rewardBase: { bossKeys: 1 }, name: "Slayer: Kill {target} Enemies" },
   { type: "kill", targetBase: 50, rewardBase: { gold: 5000 }, name: "Purge: {target} Monsters" },
   { type: "gold", targetBase: 25000, rewardBase: { dust: 150 }, name: "Hoard: {target} Gold" },
-  { type: "click", targetBase: 500, rewardBase: { gems: 3 }, name: "Tap Frenzy: {target} Clicks" },
+  { type: "click", targetBase: 500, rewardBase: { gems: 30 }, name: "Tap Frenzy: {target} Clicks" },
   { type: "kill", targetBase: 100, rewardBase: { gold: 15000 }, name: "Massacre: {target} Enemies" },
   { type: "gold", targetBase: 100000, rewardBase: { dust: 300 }, name: "Treasury: {target} Gold" },
-  { type: "click", targetBase: 1000, rewardBase: { gems: 5 }, name: "Marathon: {target} Clicks" },
+  { type: "click", targetBase: 1000, rewardBase: { gems: 50 }, name: "Marathon: {target} Clicks" },
   { type: "kill", targetBase: 1000, rewardBase: { bossKeys: 2 }, name: "Boss Hunter: {target} Kills" },
   { type: "gold", targetBase: 1000000, rewardBase: { dust: 500 }, name: "Millionaire: {target} Gold" },
-  { type: "click", targetBase: 2500, rewardBase: { gems: 10 }, name: "Finger Workout: {target} Clicks" },
+  { type: "click", targetBase: 2500, rewardBase: { gems: 100 }, name: "Finger Workout: {target} Clicks" },
   { type: "kill", targetBase: 250, rewardBase: { gold: 50000 }, name: "Exterminate: {target} Foes" },
   { type: "gold", targetBase: 5000000, rewardBase: { dust: 1000 }, name: "Wealth: {target} Gold" },
-  { type: "click", targetBase: 5000, rewardBase: { gems: 25 }, name: "Click Master: {target} Clicks" },
+  { type: "click", targetBase: 5000, rewardBase: { gems: 250 }, name: "Click Master: {target} Clicks" },
   { type: "kill", targetBase: 2000, rewardBase: { bossKeys: 3 }, name: "Genocide: {target} Kills" },
   { type: "gold", targetBase: 10000000, rewardBase: { dust: 2500 }, name: "Tycoon: {target} Gold" },
-  { type: "click", targetBase: 10000, rewardBase: { gems: 50 }, name: "Click God: {target} Clicks" },
+  { type: "click", targetBase: 10000, rewardBase: { gems: 500 }, name: "Click God: {target} Clicks" },
   { type: "kill", targetBase: 5000, rewardBase: { bossKeys: 5 }, name: "Destroyer: {target} Kills" },
 ];
 

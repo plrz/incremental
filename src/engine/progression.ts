@@ -26,7 +26,7 @@ export function performRebirth(state: GameState): GameState {
   const cost = rebirthCost(state.stats.rebirths);
   if (state.resources.gold < cost) return state;
 
-  const pointsEarned = rebirthPointsEarned(state.stats.highestWave);
+  const pointsEarned = rebirthPointsEarned(state.stats.highestWave, state.stats.rebirths);
 
   // Calculate starting conditions from rebirth upgrades
   const retainWaveLevel = state.rebirthUpgrades.retainWave || 0;

@@ -77,7 +77,8 @@ export function hatchPetEgg(state: GameState, eggInstanceId: string): GameState 
 
 /** Max active pet slots */
 export function maxPetSlots(state: GameState): number {
-  return Math.min(5, 1 + state.stats.ascensions);
+  const rbSlots = state.rebirthUpgrades.maxPets || 0;
+  return Math.min(5, 1 + state.stats.ascensions + rbSlots);
 }
 
 /** Equip a pet */

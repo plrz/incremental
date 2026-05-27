@@ -20,11 +20,11 @@ import { purchaseNode, respecSkillTree, canPurchaseNode } from '@/engine/skillTr
 import { forgeRune, combineRunes, socketRune, unsocketRune, canForgeRune } from '@/engine/runes';
 import { combineItems, transmuteMaterials, salvageItem, canTransmute } from '@/engine/crafting';
 import { performAscension, buyAscensionPerk, selectFaction } from '@/engine/ascension';
-import { hatchPetEgg, equipPet, unequipPet } from '@/engine/pets';
+import { hatchPetEgg, equipPet, unequipPet, createPetEgg } from '@/engine/pets';
 import { startResearch, cancelResearch } from '@/engine/research';
 import { startDungeon, startTimeRift, summonWorldBoss, cleanseCorruption, getTimeRiftMultiplier } from '@/engine/endgame';
 import { UPGRADES, SKILLS, CHESTS, POTIONS, WORKERS, QUALITIES, ENCHANTS, REBIRTH_UPGRADES } from '@/lib/gameConfig';
-import { upgradeCost, workerCost, rebirthCost, itemUpgradeCostGold, itemUpgradeCostDust, itemRefineCostGold, itemRefineCostDust, itemEnchantCostGold, itemEnchantCostDust, itemEvolveCostDust, itemEvolveCostGems, overdriveDestructionChance, sacrificeRiskReduction, getChestCost, getChestUnlockDuration } from '@/engine/scaling';
+import { upgradeCost, workerCost, rebirthCost, itemUpgradeCostGold, itemUpgradeCostDust, itemRefineCostGold, itemRefineCostDust, itemEnchantCostGold, itemEnchantCostDust, itemEvolveCostDust, itemEvolveCostGems, overdriveDestructionChance, sacrificeRiskReduction, getChestCost, getChestUnlockDuration, bossHpForWave } from '@/engine/scaling';
 import { formatNumber } from '@/lib/formatters';
 import { sounds } from '@/lib/sound';
 
@@ -288,6 +288,12 @@ export function useGameEngine() {
             sounds.playReveal('epic');
           }
           break;
+        case 'dungeon_key_drop':
+          if (isCombat) {
+            addEffect(cx, cy - 80, `🔑 Dungeon Key!`, '#a855f7');
+            sounds.playReveal('rare');
+          }
+          break;
         case 'boss_failed':
           if (isCombat) {
             addEffect(cx, cy, 'BOSS FAILED!', '#dc2626');
@@ -445,10 +451,20 @@ export function useGameEngine() {
     setState(prev => {
       const currentLevelInner = prev.upgrades[upgradeId as keyof typeof prev.upgrades] || 0;
       const costInner = upgradeCost(upgrade.baseCost, upgrade.costMultiplier, currentLevelInner);
+      let additionalFields = {};
+      if (upgradeId === 'runeCap') {
+        additionalFields = {
+          runes: {
+            ...prev.runes,
+            maxSlots: (prev.runes.maxSlots || 50) + 10,
+          }
+        };
+      }
       return {
         ...prev,
         resources: { ...prev.resources, gold: prev.resources.gold - costInner },
         upgrades: { ...prev.upgrades, [upgradeId]: currentLevelInner + 1 },
+        ...additionalFields,
       };
     });
   }, []);
@@ -481,7 +497,7 @@ export function useGameEngine() {
     }
     setState(prev => {
       if (prev.resources.bossKeys < 1) return prev;
-      const bossHp = Math.pow(1.1, prev.combat.currentWave) * 10000;
+      const bossHp = bossHpForWave(prev.combat.currentWave);
       addEffect(
         typeof window !== 'undefined' ? window.innerWidth / 2 : 400,
         typeof window !== 'undefined' ? window.innerHeight / 2 : 300,
@@ -1359,6 +1375,107 @@ export function useGameEngine() {
         sounds.playRebirth();
         setState(nextState);
       }
+    }, []),
+
+    buyDungeonKey: useCallback((currency: 'gold' | 'gems' | 'boss_key') => {
+      setState(prev => {
+        let cost = 0;
+        let hasResource = false;
+        let deductFunc = (s: GameState): GameState => s;
+
+        if (currency === 'gold') {
+          cost = Math.max(50000, Math.floor(prev.stats.highestWave * 5000));
+          hasResource = prev.resources.gold >= cost;
+          deductFunc = s => ({
+            ...s,
+            resources: { ...s.resources, gold: s.resources.gold - cost }
+          });
+        } else if (currency === 'gems') {
+          cost = 50;
+          hasResource = prev.resources.gems >= cost;
+          deductFunc = s => ({
+            ...s,
+            resources: { ...s.resources, gems: s.resources.gems - cost }
+          });
+        } else if (currency === 'boss_key') {
+          cost = 5;
+          hasResource = prev.resources.bossKeys >= cost;
+          deductFunc = s => ({
+            ...s,
+            resources: { ...s.resources, bossKeys: s.resources.bossKeys - cost }
+          });
+        }
+
+        if (!hasResource) return prev;
+
+        sounds.playBuy();
+
+        return deductFunc({
+          ...prev,
+          resources: {
+            ...prev.resources,
+            dungeonKeys: (prev.resources.dungeonKeys || 0) + 1
+          }
+        });
+      });
+    }, []),
+
+    exchangePurityOrbs: useCallback((optionId: string) => {
+      setState(prev => {
+        const orbs = prev.resources.purityOrbs || 0;
+        let cost = 0;
+        let rewardFunc = (s: GameState): GameState => s;
+
+        if (optionId === 'crystals') {
+          cost = 1;
+          rewardFunc = s => ({
+            ...s,
+            resources: { ...s.resources, timeCrystals: s.resources.timeCrystals + 5 }
+          });
+        } else if (optionId === 'rare_egg') {
+          cost = 10;
+          rewardFunc = s => ({
+            ...s,
+            pets: { ...s.pets, eggs: [...s.pets.eggs, createPetEgg('rare')] }
+          });
+        } else if (optionId === 'dungeon_egg') {
+          cost = 25;
+          rewardFunc = s => ({
+            ...s,
+            pets: { ...s.pets, eggs: [...s.pets.eggs, createPetEgg('dungeon')] }
+          });
+        } else if (optionId === 'rune_slots') {
+          cost = 10;
+          rewardFunc = s => ({
+            ...s,
+            runes: { ...s.runes, maxSlots: (s.runes.maxSlots || 50) + 10 }
+          });
+        } else if (optionId === 'gems') {
+          cost = 5;
+          rewardFunc = s => ({
+            ...s,
+            resources: { ...s.resources, gems: s.resources.gems + 100 }
+          });
+        } else if (optionId === 'dust') {
+          cost = 2;
+          rewardFunc = s => ({
+            ...s,
+            resources: { ...s.resources, dust: s.resources.dust + 1000 }
+          });
+        }
+
+        if (orbs < cost) return prev;
+
+        sounds.playBuy();
+
+        return rewardFunc({
+          ...prev,
+          resources: {
+            ...prev.resources,
+            purityOrbs: orbs - cost
+          }
+        });
+      });
     }, []),
 
     // Save management

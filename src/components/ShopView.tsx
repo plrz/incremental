@@ -15,6 +15,7 @@ interface ShopViewProps {
   handleRebirth: () => void;
   handleBuyRebirthUpgrade: (upgradeId: string) => void;
   buyBossKey: (currency: 'gold' | 'gems') => void;
+  buyDungeonKey: (currency: 'gold' | 'gems' | 'boss_key') => void;
 }
 
 export interface QualityOdds {
@@ -78,11 +79,11 @@ export function calculateQualityOdds(chestPower: number, state: GameState): Qual
 }
 
 export default function ShopView({
-  state, buyChest, handleUpgrade, handleRebirth, handleBuyRebirthUpgrade, buyBossKey,
+  state, buyChest, handleUpgrade, handleRebirth, handleBuyRebirthUpgrade, buyBossKey, buyDungeonKey,
 }: ShopViewProps) {
   const canDoRebirth = canRebirth(state);
   const rbCost = rebirthCost(state.stats.rebirths);
-  const rbPoints = rebirthPointsEarned(state.stats.highestWave);
+  const rbPoints = rebirthPointsEarned(state.stats.highestWave, state.stats.rebirths);
 
   return (
     <div>
@@ -134,15 +135,17 @@ export default function ShopView({
           <Twemoji emoji="🔑" /> Key Merchant
         </div>
       </div>
-      <div className="glass-card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-2xl)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-lg)', flexWrap: 'wrap' }}>
+      
+      {/* Boss Key Dealer */}
+      <div className="glass-card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-lg)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-lg)', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
           <div style={{ fontSize: '2rem', padding: '8px', background: 'var(--bg-secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Twemoji emoji="🔑" />
+            <Twemoji emoji="🗝️" />
           </div>
           <div>
             <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>Boss Key Dealer</div>
             <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: 450 }}>
-              Need to summon the boss? Buy extra keys here.
+              Need to summon the Boss Gate? Buy extra keys here.
               Gold cost scales with your highest wave reached.
             </div>
           </div>
@@ -163,6 +166,48 @@ export default function ShopView({
             style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 140, justifyContent: 'center' }}
           >
             <Twemoji emoji="💎" /> 10 Gems
+          </button>
+        </div>
+      </div>
+
+      {/* Dungeon Key Dealer */}
+      <div className="glass-card" style={{ padding: 'var(--space-lg)', marginBottom: 'var(--space-2xl)', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-lg)', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+          <div style={{ fontSize: '2rem', padding: '8px', background: 'var(--bg-secondary)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Twemoji emoji="🔑" />
+          </div>
+          <div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 2 }}>Dungeon Key Dealer</div>
+            <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', maxWidth: 450 }}>
+              Unlock Dungeon trials to earn Crystals and eggs.
+              Buy keys with gold, gems, or by trading in unused Boss Keys!
+            </div>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 'var(--space-md)', flexWrap: 'wrap' }}>
+          <button
+            className="btn btn-secondary"
+            onClick={() => buyDungeonKey('gold')}
+            disabled={state.resources.gold < Math.max(50000, Math.floor(state.stats.highestWave * 5000))}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 140, justifyContent: 'center' }}
+          >
+            <Twemoji emoji="💰" /> {formatNumber(Math.max(50000, Math.floor(state.stats.highestWave * 5000)))} Gold
+          </button>
+          <button
+            className="btn btn-secondary"
+            onClick={() => buyDungeonKey('gems')}
+            disabled={state.resources.gems < 50}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 140, justifyContent: 'center' }}
+          >
+            <Twemoji emoji="💎" /> 50 Gems
+          </button>
+          <button
+            className="btn btn-primary"
+            onClick={() => buyDungeonKey('boss_key')}
+            disabled={state.resources.bossKeys < 5}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 140, justifyContent: 'center' }}
+          >
+            <Twemoji emoji="🗝️" /> 5 Boss Keys
           </button>
         </div>
       </div>

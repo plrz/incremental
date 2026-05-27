@@ -121,6 +121,7 @@ export default function Game() {
               handleRebirth={engine.handleRebirth}
               handleBuyRebirthUpgrade={engine.handleBuyRebirthUpgrade}
               buyBossKey={engine.buyBossKey}
+              buyDungeonKey={engine.buyDungeonKey}
             />
           )}
           {activeTab === 'skills' && (
@@ -180,6 +181,7 @@ export default function Game() {
               startTimeRiftInstance={engine.startTimeRiftInstance}
               summonWorldBossInstance={engine.summonWorldBossInstance}
               cleanseCorruptionInstance={engine.cleanseCorruptionInstance}
+              exchangePurityOrbs={engine.exchangePurityOrbs}
             />
           )}
           {activeTab === 'menu' && (

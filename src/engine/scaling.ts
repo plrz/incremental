@@ -26,7 +26,30 @@ export function enemyDamageForWave(wave: number): number {
 
 /** Boss HP (for boss key fights) */
 export function bossHpForWave(wave: number): number {
-  return Math.pow(1.1, wave) * 10000;
+  return Math.pow(1.12, wave) * 20000;
+}
+
+/** World Boss HP scales exponentially */
+export function worldBossHp(wave: number, hpMultiplier: number): number {
+  return Math.pow(1.13, wave) * hpMultiplier * 2000;
+}
+
+/** Dungeon enemy HP scales dynamically with the player's highest wave to maintain challenge */
+export function dungeonEnemyHp(highestWave: number, dungeonId: string, dungeonWave: number): number {
+  const equivalentWave = Math.max(30, highestWave - 40) + dungeonWave * 4;
+  let mult = 1.0;
+  if (dungeonId === 'lich_crypt') mult = 2.5;
+  if (dungeonId === 'dragon_hoard') mult = 10.0;
+  return Math.floor(enemyHpForWave(equivalentWave, mult * 5));
+}
+
+/** Dungeon enemy damage scales dynamically with the player's highest wave */
+export function dungeonEnemyDamage(highestWave: number, dungeonId: string, dungeonWave: number): number {
+  const equivalentWave = Math.max(30, highestWave - 40) + dungeonWave * 4;
+  let mult = 1.0;
+  if (dungeonId === 'lich_crypt') mult = 2.0;
+  if (dungeonId === 'dragon_hoard') mult = 5.0;
+  return Math.floor(enemyDamageForWave(equivalentWave) * mult * 2);
 }
 
 // ============================================================
@@ -117,9 +140,9 @@ export function rebirthCost(rebirthCount: number): number {
   return 1000000 * Math.pow(5, rebirthCount);
 }
 
-/** Rebirth points earned based on highest wave */
-export function rebirthPointsEarned(highestWave: number): number {
-  return Math.floor(highestWave / 10);
+/** Rebirth points earned based on highest wave and total rebirths */
+export function rebirthPointsEarned(highestWave: number, rebirths: number = 0): number {
+  return Math.floor(highestWave / 10 + Math.pow(highestWave / 40, 2)) * (1 + rebirths * 0.2);
 }
 
 /** Damage multiplier from rebirths */

@@ -13,6 +13,7 @@ interface EndgameViewProps {
   startTimeRiftInstance: (riftType: 'minor' | 'major' | 'storm') => void;
   summonWorldBossInstance: (bossId: string) => void;
   cleanseCorruptionInstance: () => void;
+  exchangePurityOrbs: (optionId: string) => void;
 }
 
 export default function EndgameView({
@@ -21,6 +22,7 @@ export default function EndgameView({
   startTimeRiftInstance,
   summonWorldBossInstance,
   cleanseCorruptionInstance,
+  exchangePurityOrbs,
 }: EndgameViewProps) {
   const { resources, activeDungeon, worldBoss, corruption, timeRiftActive } = state;
   const [subTab, setSubTab] = useState<'dungeons' | 'rifts' | 'bosses' | 'corruption'>('dungeons');
@@ -344,6 +346,58 @@ export default function EndgameView({
                 <Twemoji emoji="✨" /> Cleanse
               </button>
             </div>
+          </div>
+
+          {/* Purity Exchange Altar */}
+          <div className="section-header" style={{ marginTop: 'var(--space-lg)' }}>
+            <div className="section-title"><Twemoji emoji="✨" /> Purity Altar Exchange</div>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px' }}>
+            {[
+              { id: 'crystals', name: 'Infuse Time Crystals', desc: 'Exchange 1 Orb for 5 Time Crystals.', cost: 1, emoji: '⏳', reward: '5 Crystals' },
+              { id: 'rare_egg', name: 'Summon Rare Egg', desc: 'Exchange 10 Orbs for 1 Rare Pet Egg.', cost: 10, emoji: '🥚', reward: '1 Rare Egg' },
+              { id: 'dungeon_egg', name: 'Summon Dungeon Egg', desc: 'Exchange 25 Orbs for 1 Dungeon Pet Egg.', cost: 25, emoji: '🐉', reward: '1 Dungeon Egg' },
+              { id: 'rune_slots', name: 'Expand Rune Pouch', desc: 'Exchange 10 Orbs for +10 Rune inventory slots.', cost: 10, emoji: '👛', reward: '+10 Slots' },
+              { id: 'gems', name: 'Refine Gems', desc: 'Exchange 5 Orbs for 100 Gems.', cost: 5, emoji: '💎', reward: '100 Gems' },
+              { id: 'dust', name: 'Refine Stardust', desc: 'Exchange 2 Orbs for 1,000 Stardust.', cost: 2, emoji: '✨', reward: '1,000 Dust' },
+            ].map(altar => {
+              const canAfford = (resources.purityOrbs || 0) >= altar.cost;
+              return (
+                <div
+                  key={altar.id}
+                  style={{
+                    padding: 16,
+                    borderRadius: 8,
+                    background: 'rgba(255,255,255,0.02)',
+                    border: '1px solid var(--glass-border)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 12,
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <span style={{ fontSize: 24 }}><Twemoji emoji={altar.emoji} /></span>
+                      <span style={{ fontWeight: 700, fontSize: 14 }}>{altar.name}</span>
+                    </div>
+                    <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 8 }}>{altar.desc}</p>
+                    <div style={{ fontSize: 11, color: 'var(--color-gold)', fontWeight: 'bold', marginTop: 4 }}>
+                      Cost: {altar.cost} Purity Orb{altar.cost > 1 ? 's' : ''}
+                    </div>
+                  </div>
+                  <button
+                    className="btn btn-secondary btn-sm"
+                    onClick={() => exchangePurityOrbs(altar.id)}
+                    disabled={!canAfford}
+                    style={{ width: '100%' }}
+                  >
+                    Claim {altar.reward}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
