@@ -335,6 +335,8 @@ export default function InventoryView({
               onEnchant={() => enchantItem(selectedItem.instanceId)}
               onOverdrive={() => activateOverdrive(selectedItem.instanceId)}
               onOverdriveRefine={(sacs) => overdriveRefine(selectedItem.instanceId, sacs)}
+              onSocketRune={handleSocketRune}
+              onUnsocketRune={handleUnsocketRune}
             />
           </div>
         </div>
@@ -349,6 +351,7 @@ function ItemDetailModal({
   item, state, onClose, onEquip, onUnequip, onDelete,
   onUpgrade, onEvolve, onRefine, onEnchant,
   onOverdrive, onOverdriveRefine,
+  onSocketRune, onUnsocketRune,
 }: {
   item: Item;
   state: GameState;
@@ -362,12 +365,25 @@ function ItemDetailModal({
   onEnchant: () => void;
   onOverdrive: () => void;
   onOverdriveRefine: (sacrificeIds: string[]) => void;
+  onSocketRune: (itemId: string, runeId: string) => void;
+  onUnsocketRune: (itemId: string, socketIndex: number) => void;
 }) {
   const quality = getQualityDef(item.quality);
   const itemDef = getItemDef(item.itemId);
   const power = calculateItemPower(item, state);
   const scrap = getScrapValue(item);
   const isEquipped = Object.values(state.inventory.equipped).includes(item.instanceId);
+
+  const socketedRuneIds = new Set<string>();
+  state.inventory.items.forEach(it => {
+    if (it.runes) {
+      it.runes.forEach(rId => {
+        if (rId) socketedRuneIds.add(rId);
+      });
+    }
+  });
+
+  const unusedRunes = state.runes.inventory.filter(r => !socketedRuneIds.has(r.instanceId));
 
   const upgCostGold = itemUpgradeCostGold(item.level);
   const upgCostDust = itemUpgradeCostDust(item.level);
@@ -421,25 +437,95 @@ function ItemDetailModal({
       )}
 
       {item.starLevel > 0 && (
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 4 }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 8 }}>
             RUNE SOCKETS ({item.runes.filter(Boolean).length}/{item.starLevel})
           </div>
-          <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {Array.from({ length: item.starLevel }).map((_, i) => {
               const runeInstanceId = item.runes[i];
               const rune = runeInstanceId ? state.runes.inventory.find(r => r.instanceId === runeInstanceId) : null;
               const def = rune ? RUNE_TYPES.find(r => r.id === rune.runeId) : null;
               return (
                 <div key={i} style={{
-                  width: 36, height: 36,
-                  background: 'var(--bg-tertiary)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  background: 'rgba(255,255,255,0.02)',
+                  padding: 8,
+                  borderRadius: 8,
                   border: '1px solid var(--glass-border)',
-                  borderRadius: 6,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 16,
                 }}>
-                  {def?.emoji ? <Twemoji emoji={def.emoji} /> : '◇'}
+                  <div style={{
+                    width: 36, height: 36,
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--glass-border)',
+                    borderRadius: 6,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 16,
+                    flexShrink: 0,
+                  }}>
+                    {def?.emoji ? <Twemoji emoji={def.emoji} /> : '◇'}
+                  </div>
+
+                  {rune ? (
+                    <div style={{ display: 'flex', flex: 1, alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+                      <div style={{ fontSize: 12 }}>
+                        <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+                          {def?.name} Lv.{rune.level}
+                        </div>
+                        <div style={{ color: 'var(--color-gold)', fontSize: 11 }}>
+                          {def ? def.description.replace('{value}', (rune.level * def.baseValue).toString()) : ''}
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                        <button
+                          className="btn btn-danger btn-xs"
+                          onClick={() => onUnsocketRune(item.instanceId, i)}
+                          disabled={state.resources.dust < 500}
+                          style={{ padding: '3px 8px', fontSize: 11 }}
+                        >
+                          Unsocket
+                        </button>
+                        <span style={{ fontSize: 9, color: 'var(--text-muted)', marginTop: 2, textAlign: 'right' }}>
+                          Costs 500 ✨ (70% success, destroys on fail)
+                        </span>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flex: 1, alignItems: 'center', gap: 8 }}>
+                      <select
+                        value=""
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            onSocketRune(item.instanceId, e.target.value);
+                          }
+                        }}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: 'var(--radius-sm)',
+                          background: 'var(--bg-tertiary)',
+                          border: '1px solid var(--glass-border)',
+                          color: 'var(--text-primary)',
+                          fontSize: 12,
+                          cursor: 'pointer',
+                          flex: 1,
+                          height: 32,
+                        }}
+                      >
+                        <option value="">Equip Rune...</option>
+                        {unusedRunes.map(r => {
+                          const rDef = RUNE_TYPES.find(rt => rt.id === r.runeId);
+                          const valStr = rDef ? rDef.description.replace('{value}', (r.level * rDef.baseValue).toString()) : '';
+                          return (
+                            <option key={r.instanceId} value={r.instanceId} style={{ color: '#000' }}>
+                              {rDef?.emoji} {rDef?.name} Lv.{r.level} ({valStr})
+                            </option>
+                          );
+                        })}
+                      </select>
+                    </div>
+                  )}
                 </div>
               );
             })}

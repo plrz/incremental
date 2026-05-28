@@ -8,6 +8,7 @@ import type { GameState, ActiveDungeon, WorldBossState } from './gameState';
 import { DUNGEONS, WORLD_BOSSES } from '@/lib/gameConfig';
 import { createPetEgg } from './pets';
 import { dungeonEnemyHp, worldBossHp } from './scaling';
+import { getEnemyStats } from './combat';
 
 // ============================================================
 // DUNGEONS
@@ -55,10 +56,20 @@ export function tickDungeon(state: GameState, seconds: number): { state: GameSta
   const timeLeft = Math.max(0, ad.timeLeft - seconds);
   if (timeLeft <= 0) {
     // FAILED - exit dungeon
+    const enemy = getEnemyStats(state.combat.currentWave, 0, null, state.combat.isBossGate && !state.combat.bossFightActive);
+    const corruptionMultiplier = 1 + (state.corruption * 0.01);
+    const waveHp = Math.floor(enemy.maxHp * corruptionMultiplier);
     return {
       state: {
         ...state,
         activeDungeon: null,
+        combat: {
+          ...state.combat,
+          currentEnemyHp: waveHp,
+          currentEnemyMaxHp: waveHp,
+          currentEnemyElement: enemy.element,
+          enemiesDefeated: 0,
+        }
       },
       event: 'DUNGEON_FAILED',
     };
@@ -85,6 +96,10 @@ export function tickDungeon(state: GameState, seconds: number): { state: GameSta
       eggs.push(createPetEgg('standard'));
     }
 
+    const enemy = getEnemyStats(state.combat.currentWave, 0, null, state.combat.isBossGate && !state.combat.bossFightActive);
+    const corruptionMultiplier = 1 + (state.corruption * 0.01);
+    const waveHp = Math.floor(enemy.maxHp * corruptionMultiplier);
+
     return {
       state: {
         ...state,
@@ -98,6 +113,13 @@ export function tickDungeon(state: GameState, seconds: number): { state: GameSta
           eggs,
         },
         activeDungeon: null,
+        combat: {
+          ...state.combat,
+          currentEnemyHp: waveHp,
+          currentEnemyMaxHp: waveHp,
+          currentEnemyElement: enemy.element,
+          enemiesDefeated: 0,
+        }
       },
       event: 'DUNGEON_SUCCESS',
     };
@@ -189,10 +211,20 @@ export function tickWorldBoss(state: GameState, seconds: number): { state: GameS
   const elapsed = wb.elapsed + seconds;
   if (elapsed >= wb.timeLimit) {
     // Time out - failed
+    const enemy = getEnemyStats(state.combat.currentWave, 0, null, state.combat.isBossGate && !state.combat.bossFightActive);
+    const corruptionMultiplier = 1 + (state.corruption * 0.01);
+    const waveHp = Math.floor(enemy.maxHp * corruptionMultiplier);
     return {
       state: {
         ...state,
         worldBoss: null,
+        combat: {
+          ...state.combat,
+          currentEnemyHp: waveHp,
+          currentEnemyMaxHp: waveHp,
+          currentEnemyElement: enemy.element,
+          enemiesDefeated: 0,
+        }
       },
       event: 'WORLD_BOSS_FAILED',
     };
@@ -201,6 +233,9 @@ export function tickWorldBoss(state: GameState, seconds: number): { state: GameS
   // Handle boss defeat
   if (wb.hp <= 0) {
     // Reward: Purity Orbs, Gems, and Dust
+    const enemy = getEnemyStats(state.combat.currentWave, 0, null, state.combat.isBossGate && !state.combat.bossFightActive);
+    const corruptionMultiplier = 1 + (state.corruption * 0.01);
+    const waveHp = Math.floor(enemy.maxHp * corruptionMultiplier);
     return {
       state: {
         ...state,
@@ -211,6 +246,13 @@ export function tickWorldBoss(state: GameState, seconds: number): { state: GameS
           dust: state.resources.dust + 2000,
         },
         worldBoss: null,
+        combat: {
+          ...state.combat,
+          currentEnemyHp: waveHp,
+          currentEnemyMaxHp: waveHp,
+          currentEnemyElement: enemy.element,
+          enemiesDefeated: 0,
+        }
       },
       event: 'WORLD_BOSS_SUCCESS',
     };

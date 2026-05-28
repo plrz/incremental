@@ -128,6 +128,11 @@ export function processCombatTick(state: GameState): CombatTickResult {
   // Update time played
   stats.timePlayed = (stats.timePlayed || 0) + 0.1;
 
+  // Prevent enemy HP softlocks (e.g. when exiting dungeons or world bosses)
+  if (combat.currentEnemyHp > combat.currentEnemyMaxHp) {
+    combat.currentEnemyHp = combat.currentEnemyMaxHp;
+  }
+
   // Repair stuck boss gate states (e.g. wave 49 with 5/5 or 6/5 enemies defeated)
   const enemiesNeededCurrent = enemiesPerWave(combat.currentWave);
   if (combat.enemiesDefeated >= enemiesNeededCurrent && isBossGateWave(combat.currentWave + 1)) {

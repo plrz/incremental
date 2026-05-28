@@ -29,26 +29,36 @@ export function bossHpForWave(wave: number): number {
   return Math.pow(1.12, wave) * 20000;
 }
 
-/** World Boss HP scales exponentially */
+/** World Boss HP scales in proportion to standard gate bosses */
 export function worldBossHp(wave: number, hpMultiplier: number): number {
-  return Math.pow(1.13, wave) * hpMultiplier * 2000;
+  return bossHpForWave(wave) * (hpMultiplier / 10);
 }
 
-/** Dungeon enemy HP scales dynamically with the player's highest wave to maintain challenge */
+/** Dungeon enemy HP scales statically based on dungeon tier rather than player highest wave */
 export function dungeonEnemyHp(highestWave: number, dungeonId: string, dungeonWave: number): number {
-  const equivalentWave = Math.max(30, highestWave - 40) + dungeonWave * 4;
+  let equivalentWave = 20 + dungeonWave * 3;
   let mult = 1.0;
-  if (dungeonId === 'lich_crypt') mult = 2.5;
-  if (dungeonId === 'dragon_hoard') mult = 10.0;
+  if (dungeonId === 'lich_crypt') {
+    equivalentWave = 60 + dungeonWave * 5;
+    mult = 2.5;
+  } else if (dungeonId === 'dragon_hoard') {
+    equivalentWave = 130 + dungeonWave * 9;
+    mult = 8.0;
+  }
   return Math.floor(enemyHpForWave(equivalentWave, mult * 5));
 }
 
-/** Dungeon enemy damage scales dynamically with the player's highest wave */
+/** Dungeon enemy damage scales statically based on dungeon tier */
 export function dungeonEnemyDamage(highestWave: number, dungeonId: string, dungeonWave: number): number {
-  const equivalentWave = Math.max(30, highestWave - 40) + dungeonWave * 4;
+  let equivalentWave = 20 + dungeonWave * 3;
   let mult = 1.0;
-  if (dungeonId === 'lich_crypt') mult = 2.0;
-  if (dungeonId === 'dragon_hoard') mult = 5.0;
+  if (dungeonId === 'lich_crypt') {
+    equivalentWave = 60 + dungeonWave * 5;
+    mult = 2.5;
+  } else if (dungeonId === 'dragon_hoard') {
+    equivalentWave = 130 + dungeonWave * 9;
+    mult = 8.0;
+  }
   return Math.floor(enemyDamageForWave(equivalentWave) * mult * 2);
 }
 
